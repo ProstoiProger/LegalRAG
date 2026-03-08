@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+openai
+qdrant-client
+elasticsearch
+sentence-transformers
+pandas
