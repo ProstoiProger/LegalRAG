@@ -134,7 +134,7 @@ function appendMessage(role, text, scroll = true) {
             <div class="icon-box">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">gavel</span>
             </div>
-            <span class="title">ZANGGER AI Кеңесі</span>
+            <span class="title">Lex AI Кеңесі</span>
         `;
         msg.appendChild(header);
 
