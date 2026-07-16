@@ -56,10 +56,24 @@ RAG_SYSTEM_PROMPT = """
 ---
 """
 
-embed_model = SentenceTransformer("BAAI/bge-m3")
-client = OpenAI(api_key=OPENAI_API_KEY)
+_embed_model = None
+_openai_client = None
 q_client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
 es = Elasticsearch([ELASTICSEARCH_URL])
+
+
+def get_embed_model():
+    global _embed_model
+    if _embed_model is None:
+        _embed_model = SentenceTransformer("BAAI/bge-m3")
+    return _embed_model
+
+
+def get_openai_client():
+    global _openai_client
+    if _openai_client is None:
+        _openai_client = OpenAI(api_key=OPENAI_API_KEY)
+    return _openai_client
 
 
 def retrieve_hybrid_context(question, top_k=10, alpha=None):
@@ -69,7 +83,10 @@ def retrieve_hybrid_context(question, top_k=10, alpha=None):
         "_source": ["text", "doc_id", "chunk_id"],
         "query": {"match": {"text": {"query": question}}},
     }
-    es_res = es.search(index=ES_INDEX, body=sparse_body)
+    try:
+        es_res = es.search(index=ES_INDEX, body=sparse_body)
+    except Exception:
+        es_res = {"hits": {"hits": []}}
     sparse_hits = [
         {
             "key": f"{h['_source'].get('doc_id')}||{h['_source'].get('chunk_id')}",
@@ -79,14 +96,17 @@ def retrieve_hybrid_context(question, top_k=10, alpha=None):
         for h in es_res.get("hits", {}).get("hits", [])
     ]
 
-    query_vector = embed_model.encode(
-        ["query: " + question], normalize_embeddings=True
-    )[0].tolist()
-    q_res = q_client.query_points(
-        collection_name=COLLECTION_NAME,
-        query=query_vector,
-        limit=top_k * 2,
-    ).points
+    try:
+        query_vector = get_embed_model().encode(
+            ["query: " + question], normalize_embeddings=True
+        )[0].tolist()
+        q_res = q_client.query_points(
+            collection_name=COLLECTION_NAME,
+            query=query_vector,
+            limit=top_k * 2,
+        ).points
+    except Exception:
+        q_res = []
     dense_hits = [
         {
             "key": f"{hit.payload.get('doc_id')}||{hit.payload.get('chunk_id')}",
@@ -96,7 +116,8 @@ def retrieve_hybrid_context(question, top_k=10, alpha=None):
         for hit in q_res
     ]
 
-    df_s, df_d = pd.DataFrame(sparse_hits), pd.DataFrame(dense_hits)
+    df_s = pd.DataFrame(sparse_hits, columns=["key", "text", "sparse_score"])
+    df_d = pd.DataFrame(dense_hits, columns=["key", "text", "dense_score"])
     if df_s.empty and df_d.empty:
         return ""
     df = pd.merge(df_s, df_d, on=["key", "text"], how="outer").fillna(0.0)
@@ -118,6 +139,9 @@ def retrieve_hybrid_context(question, top_k=10, alpha=None):
 
 
 def get_legal_answer(query: str, history: list[dict] | None = None):
+    if not OPENAI_API_KEY:
+        return "OPENAI_API_KEY серверде бапталмаған. .env файлына кілт қосып, backend контейнерін қайта іске қосыңыз."
+
     context = retrieve_hybrid_context(query)
     user_content = f"КОНТЕКСТ:\n{context}\n\nСҰРАҚ:\n{query}"
 
@@ -127,7 +151,7 @@ def get_legal_answer(query: str, history: list[dict] | None = None):
             messages.append({"role": msg["role"], "content": msg["content"]})
     messages.append({"role": "user", "content": user_content})
 
-    response = client.chat.completions.create(
+    response = get_openai_client().chat.completions.create(
         model=OPENAI_MODEL,
         messages=messages,
         temperature=0,

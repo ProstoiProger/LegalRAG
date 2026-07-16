@@ -85,12 +85,6 @@
             <span class="text-sm font-medium">Жаңа чат</span>
         </button>
         <nav id="chat-list" class="chat-list flex-1 space-y-1 overflow-y-auto" aria-label="Сөйлесімдер тізімі"></nav>
-        <div class="pt-4 border-t border-slate-200/50 space-y-1">
-            <a class="text-slate-600 hover:bg-slate-200 flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200" href="#">
-                <span class="material-symbols-outlined">help</span>
-                <span class="text-sm">Көмек</span>
-            </a>
-        </div>
     </aside>
 
     <!-- Main -->
@@ -101,6 +95,17 @@
                 <span class="text-2xl font-headline font-bold tracking-tight text-blue-900">Lex AI</span>
                 <div class="h-6 w-px bg-slate-200 mx-2"></div>
                 <h2 id="chat-title" class="text-sm font-medium text-slate-600">Жаңа сөйлесім</h2>
+                <div id="chat-menu" style="display:none; position:relative;">
+                    <button id="chat-menu-btn" class="flex items-center justify-center w-7 h-7 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-all duration-150">
+                        <span class="material-symbols-outlined" style="font-size:18px;">more_vert</span>
+                    </button>
+                    <div id="chat-menu-dropdown" style="display:none;" class="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50 min-w-[140px]">
+                        <button id="chat-menu-delete" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                            <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+                            Жою
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="flex items-center gap-3">
                 <span class="text-[10px] font-bold text-slate-300 uppercase tracking-tighter hidden sm:block">LEX CORE V2.0</span>
@@ -108,9 +113,7 @@
         </header>
 
         <!-- Messages -->
-        <section id="messages" class="messages flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth">
-            <div class="max-w-4xl mx-auto w-full space-y-6 pb-32"></div>
-        </section>
+        <section id="messages" class="messages flex-1 overflow-y-auto p-6 pb-40 space-y-8 scroll-smooth"></section>
 
         <!-- Input -->
         <footer class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-surface via-surface/90 to-transparent">

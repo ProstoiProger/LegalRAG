@@ -19,7 +19,8 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     padding: 0.625rem 0.75rem;
     margin-bottom: 0.25rem;
     background: transparent;
@@ -47,27 +48,68 @@
     box-shadow: 0 1px 3px rgba(0, 30, 64, 0.08);
 }
 
-/* Delete button on chat items */
-.chat-item-delete {
-    display: none;
-    margin-left: auto;
-    padding: 2px;
+/* Three-dot menu on chat items */
+.chat-item-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.chat-item-menu {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.chat-item-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
     background: none;
     border: none;
     color: #737780;
     cursor: pointer;
     border-radius: 4px;
-    flex-shrink: 0;
-    transition: color 0.15s ease, background 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
-.chat-item-delete:hover {
-    color: #ba1a1a;
-    background: rgba(186, 26, 26, 0.08);
+.chat-item-menu-btn:hover {
+    background: #d1d5db;
+    color: #191c1e;
 }
 
-.chat-item:hover .chat-item-delete {
+.chat-item-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 2px);
+    background: #fff;
+    border: 1px solid #e2e4e9;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    z-index: 100;
+    min-width: 130px;
+    padding: 4px;
+}
+
+.chat-item-dropdown-delete {
     display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 10px;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    color: #ba1a1a;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.chat-item-dropdown-delete:hover {
+    background: rgba(186, 26, 26, 0.08);
 }
 
 /* Messages */
@@ -280,7 +322,12 @@
     }
 
     .chat-item-delete {
-        display: none !important;
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        padding: 1px;
+        font-size: 12px;
+        margin-left: 0;
     }
 }
 

@@ -1,4 +1,4 @@
-const API_BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || "http://127.0.0.1:8000";
+const API_BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || "";
 
 const sendBtn = document.getElementById("send-btn");
 const userInput = document.getElementById("user-input");
@@ -6,6 +6,10 @@ const messagesContainer = document.getElementById("messages");
 const chatListEl = document.getElementById("chat-list");
 const btnNewChat = document.querySelector(".btn-new-chat");
 const chatTitleEl = document.getElementById("chat-title");
+const chatMenu = document.getElementById("chat-menu");
+const chatMenuBtn = document.getElementById("chat-menu-btn");
+const chatMenuDropdown = document.getElementById("chat-menu-dropdown");
+const chatMenuDelete = document.getElementById("chat-menu-delete");
 
 const TEXTAREA_MAX_HEIGHT = 200;
 
@@ -44,11 +48,19 @@ async function loadChats() {
         chatListEl.innerHTML = chats
             .map(
                 (c) =>
-                    `<div class="chat-item-wrapper" style="position:relative;display:flex;align-items:center;">
-                        <button type="button" class="chat-item" data-chat-id="${c.id}" title="${escapeAttr(c.title)}" style="flex:1;">${escapeHtml(c.title)}</button>
-                        <button type="button" class="chat-item-delete" data-chat-id="${c.id}" title="Жою">
-                            <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
-                        </button>
+                    `<div class="chat-item-wrapper">
+                        <button type="button" class="chat-item" data-chat-id="${c.id}" title="${escapeAttr(c.title)}">${escapeHtml(c.title)}</button>
+                        <div class="chat-item-menu">
+                            <button type="button" class="chat-item-menu-btn" data-chat-id="${c.id}">
+                                <span class="material-symbols-outlined" style="font-size:18px;">more_vert</span>
+                            </button>
+                            <div class="chat-item-dropdown" style="display:none;">
+                                <button type="button" class="chat-item-dropdown-delete" data-chat-id="${c.id}">
+                                    <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
+                                    Жою
+                                </button>
+                            </div>
+                        </div>
                     </div>`
             )
             .join("");
@@ -57,7 +69,17 @@ async function loadChats() {
             btn.addEventListener("click", () => selectChat(btn.dataset.chatId));
         });
 
-        chatListEl.querySelectorAll(".chat-item-delete").forEach((btn) => {
+        chatListEl.querySelectorAll(".chat-item-menu-btn").forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const dropdown = btn.nextElementSibling;
+                const isOpen = dropdown.style.display === "block";
+                document.querySelectorAll(".chat-item-dropdown").forEach(d => d.style.display = "none");
+                dropdown.style.display = isOpen ? "none" : "block";
+            });
+        });
+
+        chatListEl.querySelectorAll(".chat-item-dropdown-delete").forEach((btn) => {
             btn.addEventListener("click", (e) => {
                 e.stopPropagation();
                 deleteChat(btn.dataset.chatId);
@@ -86,6 +108,7 @@ async function selectChat(chatId) {
     currentChatId = chatId;
     chatListEl.querySelectorAll(".chat-item").forEach((el) => el.classList.remove("active"));
     chatListEl.querySelector(`[data-chat-id="${chatId}"]`)?.classList.add("active");
+    chatMenu.style.display = "block";
 
     try {
         const res = await fetch(apiUrl(`/api/chats/${chatId}`));
@@ -109,6 +132,8 @@ function newChat() {
     messagesContainer.innerHTML = "";
     messagesContainer.classList.add("empty");
     chatTitleEl.textContent = "Жаңа сөйлесім";
+    chatMenu.style.display = "none";
+    chatMenuDropdown.style.display = "none";
     userInput.value = "";
     userInput.focus();
 }
@@ -230,6 +255,7 @@ async function handleSend() {
 
         currentChatId = data.chat_id;
         chatTitleEl.textContent = query.length > 50 ? query.slice(0, 50) + "…" : query;
+        chatMenu.style.display = "block";
         loadChats();
     } catch (_) {
         const content = loadingRow.querySelector(".bot-content");
@@ -254,6 +280,22 @@ userInput.addEventListener("keydown", (e) => {
 setTimeout(resizeTextarea, 0);
 
 btnNewChat.addEventListener("click", newChat);
+
+chatMenuBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = chatMenuDropdown.style.display === "block";
+    chatMenuDropdown.style.display = isOpen ? "none" : "block";
+});
+
+chatMenuDelete.addEventListener("click", () => {
+    chatMenuDropdown.style.display = "none";
+    if (currentChatId) deleteChat(currentChatId);
+});
+
+document.addEventListener("click", () => {
+    chatMenuDropdown.style.display = "none";
+    document.querySelectorAll(".chat-item-dropdown").forEach(d => d.style.display = "none");
+});
 
 messagesContainer.classList.add("empty");
 loadChats();

@@ -1,16 +1,64 @@
-# Python-generated files
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Python bytecode and caches
 __pycache__/
-*.py[oc]
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Python packaging
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
+.eggs/
 
 # Virtual environments
-.venv
+.venv/
+venv/
+env/
+ENV/
 
-# Environment and secrets
-.env
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 
+# Local backup files
+*.bak
+*.bak.*
+*.backup
+*.orig
 
-.*
+# Logs and runtime state
+logs/
+*.log
+*.pid
+*.pid.lock
+
+# Downloaded model caches
+hf-cache/
+hf_cache/
+.cache/huggingface/
+
+# Generated/local datasets
+data/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Local agent/tool state
+.agents/
+.codex/

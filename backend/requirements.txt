@@ -4,6 +4,6 @@ pydantic
 python-dotenv
 openai
 qdrant-client
-elasticsearch
+elasticsearch>=8,<9
 sentence-transformers
 pandas

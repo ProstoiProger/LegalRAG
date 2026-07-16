@@ -3,16 +3,47 @@ from datetime import datetime
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel
 
 from config import PORT
-from engine import get_legal_answer
+from engine import get_legal_answer, get_embed_model
 
 app = FastAPI(title="Legal RAG Chatbot")
 
+
+@app.on_event("startup")
+async def startup_event():
+    import asyncio
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, get_embed_model)
+
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=[
+        "lex-ai.kz",
+        "www.lex-ai.kz",
+        "chat.lex-ai.kz",
+        "back.lex-ai.kz",
+        "92.38.49.196",
+        "localhost",
+        "127.0.0.1",
+        "backend",
+    ],
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://lex-ai.kz",
+        "https://www.lex-ai.kz",
+        "https://chat.lex-ai.kz",
+        "https://back.lex-ai.kz",
+        "http://lex-ai.kz",
+        "http://www.lex-ai.kz",
+        "http://chat.lex-ai.kz",
+        "http://back.lex-ai.kz",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
